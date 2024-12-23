@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symbolic Differentiation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 8px;
+        }
+        #result {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Symbolic Differentiation</h1>
+    <label for="expression">Expression:</label>
+    <input type="text" id="expression" placeholder="Enter expression, e.g., x^3 - x^4 + 7*x">
+
+    <label for="variable">Variable:</label>
+    <input type="text" id="variable" placeholder="Enter variable, e.g., x">
+
+    <button onclick="computeDerivative()">Differentiate</button>
+
+    <div id="result">Result will appear here...</div>
+
+    <script>
+        // Function to symbolically differentiate an expression
+        function differentiate(expression, variable) {
+            // Handle addition and subtraction
+            if (expression.includes('+') || expression.includes('-')) {
+                return expression.split(/(\+|\-)/).map((term, index) => {
+                    if (term === '+' || term === '-') return term; // Keep operators
+                    return differentiate(term.trim(), variable); // Recursively differentiate
+                }).join('');
+            }
+
+            // Handle multiplication (simple cases like "7*x")
+            if (expression.includes('*')) {
+                const parts = expression.split('*');
+                if (parts.includes(variable)) {
+                    const coefficient = parts[0] === variable ? '1' : parts[0];
+                    return coefficient;
+                }
+                return '0';
+            }
+
+            // Handle power terms (x^n)
+            if (expression.includes('^')) {
+                const [base, exponent] = expression.split('^');
+                if (base === variable) {
+                    const newExponent = parseInt(exponent) - 1;
+                    return `${exponent}*${base}^${newExponent}`;
+                }
+                return '0';
+            }
+
+            // Handle constants and single variables
+            if (expression === variable) return '1';
+            if (!isNaN(parseFloat(expression))) return '0';
+
+            return '0'; // Default case
+        }
+
+        // Function to compute and display the result
+        function computeDerivative() {
+            const expression = document.getElementById('expression').value.trim();
+            const variable = document.getElementById('variable').value.trim();
+
+            if (!expression || !variable) {
+                document.getElementById('result').innerText = "Please provide both expression and variable.";
+                return;
+            }
+
+            try {
+                const result = differentiate(expression, variable);
+                document.getElementById('result').innerText = `Result: ${result}`;
+            } catch (error) {
+                document.getElementById('result').innerText = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>
